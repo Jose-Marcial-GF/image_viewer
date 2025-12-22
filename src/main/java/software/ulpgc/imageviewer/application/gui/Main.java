@@ -17,7 +17,7 @@ import java.nio.file.Files;
 public class Main {
     private static File root;
 
-    public static void main(String[] args) throws IOException {
+    static void main(String[] args) throws IOException {
         FlatDarkLaf.setup();
         root = new File("images");
         ImageStore store = new FileImageStore(root);
