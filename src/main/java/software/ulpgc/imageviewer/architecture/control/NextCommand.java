@@ -2,17 +2,13 @@ package software.ulpgc.imageviewer.architecture.control;
 
 import software.ulpgc.imageviewer.architecture.io.ImagePresenter;
 
-public class NextCommand implements Command {
-    private final ImagePresenter imagePresenter;
+import javax.swing.*;
 
-    public NextCommand(ImagePresenter imagePresenter) {
-        this.imagePresenter = imagePresenter;
-    }
+public record NextCommand(ImagePresenter imagePresenter) implements Command {
 
     @Override
     public void execute() {
-        imagePresenter.show(imagePresenter.image().next());
+        Timer timer = imagePresenter.animateMovement(0, -imagePresenter.display().width(), imagePresenter.image().next() );
+        timer.start();
     }
-
-
 }

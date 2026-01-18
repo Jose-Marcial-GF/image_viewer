@@ -6,15 +6,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class ImageProvider {
-    private final List<String> images;
-
-    private ImageProvider(Stream<String> images) {
-        this.images = images.toList();
-    }
+public record ImageProvider(List<String> images) {
 
     public static ImageProvider with(Stream<String> images) {
-        return new ImageProvider(images);
+        return new ImageProvider(images.toList());
     }
 
     public Image first(Function<String, byte[]> loader) {

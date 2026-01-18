@@ -13,10 +13,10 @@ import static java.awt.Color.*;
 
 public class Desktop extends JFrame {
     private final Map<String, Command> commands;
-    private JButton prevButton = button(" \u25C0 ", "prev");
-    private JButton nextButton = button(" \u25B6 ", "next");
+    private final JButton prevButton = button(" \u25C0 ", "prev");
+    private final JButton nextButton = button(" \u25B6 ", "next");
 
-    public static Desktop create(SwingImageDisplay imageDisplay) throws IOException {
+    public static Desktop create(SwingImageDisplay imageDisplay) {
         return new Desktop(imageDisplay);
     }
 
@@ -42,6 +42,7 @@ public class Desktop extends JFrame {
 
                     prevButton.setForeground(newColor);
                     nextButton.setForeground(newColor);
+                    commands.get("present").execute();
                 });
     }
 
@@ -95,7 +96,7 @@ public class Desktop extends JFrame {
         button.setBorderPainted(false);
         button.setFocusPainted(false);
         button.setForeground(WHITE);
-        button.addActionListener(e -> commands.get(command).execute());
+        button.addActionListener(_ -> commands.get(command).execute());
         return button;
     }
 

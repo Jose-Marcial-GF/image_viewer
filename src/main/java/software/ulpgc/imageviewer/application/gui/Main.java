@@ -2,10 +2,7 @@ package software.ulpgc.imageviewer.application.gui;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import software.ulpgc.imageviewer.application.FileImageStore;
-import software.ulpgc.imageviewer.architecture.control.NextCommand;
-import software.ulpgc.imageviewer.architecture.control.PrevCommand;
-import software.ulpgc.imageviewer.architecture.control.ZoomInCommand;
-import software.ulpgc.imageviewer.architecture.control.ZoomOutCommand;
+import software.ulpgc.imageviewer.architecture.control.*;
 import software.ulpgc.imageviewer.architecture.io.ImagePresenter;
 import software.ulpgc.imageviewer.architecture.io.ImageProvider;
 import software.ulpgc.imageviewer.architecture.io.ImageStore;
@@ -17,7 +14,7 @@ import java.nio.file.Files;
 public class Main {
     private static File root;
 
-    static void main(String[] args) throws IOException {
+    static void main(String[] args) {
         FlatDarkLaf.setup();
         root = new File("images");
         ImageStore store = new FileImageStore(root);
@@ -30,6 +27,7 @@ public class Main {
                 .put("prev", new PrevCommand(imagePresenter))
                 .put("zoomIn", new ZoomInCommand(imagePresenter))
                 .put("zoomOut", new ZoomOutCommand(imagePresenter))
+                .put("present", new PresentCommand(imagePresenter))
                 .setVisible(true);
     }
 

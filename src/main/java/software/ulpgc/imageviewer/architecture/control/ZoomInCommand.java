@@ -2,12 +2,7 @@ package software.ulpgc.imageviewer.architecture.control;
 
 import software.ulpgc.imageviewer.architecture.io.ImagePresenter;
 
-public class ZoomInCommand implements Command {
-    private final ImagePresenter imagePresenter;
-
-    public ZoomInCommand(ImagePresenter imagePresenter) {
-        this.imagePresenter = imagePresenter;
-    }
+public record ZoomInCommand(ImagePresenter imagePresenter) implements Command {
 
     @Override
     public void execute() {

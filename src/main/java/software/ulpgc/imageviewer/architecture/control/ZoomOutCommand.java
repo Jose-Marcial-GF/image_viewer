@@ -2,12 +2,7 @@ package software.ulpgc.imageviewer.architecture.control;
 
 import software.ulpgc.imageviewer.architecture.io.ImagePresenter;
 
-public class ZoomOutCommand implements Command {
-    private final ImagePresenter imagePresenter;
-
-    public ZoomOutCommand(ImagePresenter imagePresenter) {
-        this.imagePresenter = imagePresenter;
-    }
+public record ZoomOutCommand(ImagePresenter imagePresenter) implements Command {
 
     @Override
     public void execute() {
