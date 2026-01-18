@@ -2,6 +2,7 @@ package software.ulpgc.imageviewer.application.gui;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import software.ulpgc.imageviewer.application.FileImageStore;
+import software.ulpgc.imageviewer.application.SwingRescheduler;
 import software.ulpgc.imageviewer.architecture.control.*;
 import software.ulpgc.imageviewer.architecture.io.ImagePresenter;
 import software.ulpgc.imageviewer.architecture.io.ImageProvider;
@@ -20,7 +21,7 @@ public class Main {
         ImageStore store = new FileImageStore(root);
         ImageProvider imageProvider = ImageProvider.with(store.images());
         SwingImageDisplay imageDisplay = new SwingImageDisplay();
-        ImagePresenter imagePresenter = new ImagePresenter(imageDisplay);
+        ImagePresenter imagePresenter = new ImagePresenter(imageDisplay, SwingRescheduler::new);
         imagePresenter.show(imageProvider.first(Main::readImage));
         Desktop.create(imageDisplay)
                 .put("next", new NextCommand(imagePresenter))

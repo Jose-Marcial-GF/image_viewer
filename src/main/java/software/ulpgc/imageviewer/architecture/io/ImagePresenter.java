@@ -4,13 +4,14 @@ import software.ulpgc.imageviewer.architecture.ui.ImageDisplay;
 import software.ulpgc.imageviewer.architecture.ui.ImageDisplay.Paint;
 import software.ulpgc.imageviewer.architecture.model.Image;
 
-import javax.swing.*;
+
 
 import static java.lang.Math.max;
 
 public class ImagePresenter {
     private final ImageDisplay display;
-    private final Timer presentationTimer;
+    private final Rescheduler.Factory reschedulerFactory;
+    private final Rescheduler presentationTimer;
     private Image image;
     private double zoom = 1.0;
 
@@ -18,8 +19,9 @@ public class ImagePresenter {
         return display;
     }
 
-    public ImagePresenter(ImageDisplay display) {
+    public ImagePresenter(ImageDisplay display, Rescheduler.Factory factory) {
         this.display = display;
+        this.reschedulerFactory = factory;
         this.display.on((ImageDisplay.Zoom) factor ->{
             updateZoom(factor);
             repaint();
@@ -33,10 +35,7 @@ public class ImagePresenter {
             resetZoom();
             animateRelease(offset);
         });
-        this.presentationTimer = new Timer(5000, _ ->{
-            Timer animation = animateMovement(0, -display.width(), image.next());
-            animation.start();
-        });
+        this.presentationTimer = reschedulerFactory.create(5000, _ -> this.animateMovement(0, -display.width(), image.next()).start());
     }
 
     private void repaint() {
@@ -62,19 +61,18 @@ public class ImagePresenter {
         if (Math.abs(initialOffset)*4 > display.width()) {
             targetOffset = initialOffset < 0 ? -display.width() : display.width();
             targetImage = initialOffset < 0 ? image.next() : image.previous();
-            Timer timer = animateMovement(initialOffset, targetOffset, targetImage);
+            Rescheduler timer = animateMovement(initialOffset, targetOffset, targetImage);
             timer.start();
             return;
         }
-        Timer timer = animateMovement(initialOffset, 0, image);
+        Rescheduler timer = animateMovement(initialOffset, 0, image);
         timer.start();
     }
 
-    public Timer animateMovement(int initialOffset, int targetOffset, Image targetImage) {
+    public Rescheduler animateMovement(int initialOffset, int targetOffset, Image targetImage) {
         final int[] currentOffset = {initialOffset};
 
-        Timer timer = new Timer(10, null);
-        timer.addActionListener(_ -> {
+        return reschedulerFactory.create(10,(timer) ->  {
             int step = (targetOffset - currentOffset[0]);
 
             if (Math.abs(step) <= 2) {
@@ -89,8 +87,8 @@ public class ImagePresenter {
                 currentOffset[0] += move;
                 repaint(currentOffset[0]);
             }
+
         });
-        return timer;
     }
 
 
