@@ -39,6 +39,10 @@ public class SwingImageDisplay extends JPanel implements ImageDisplay {
         return this.getWidth();
     }
 
+    @Override
+    public int height() {return this.getHeight();
+    }
+
     private final Map<Integer, BufferedImage> images = new HashMap<>();
     private BufferedImage toBufferedImage(byte[] bitmap) {
         return images.computeIfAbsent(Arrays.hashCode(bitmap), _ -> read(bitmap));
@@ -54,19 +58,26 @@ public class SwingImageDisplay extends JPanel implements ImageDisplay {
 
     @Override
     public void paint(Graphics g) {
-        g.setColor(Color.BLACK);
-        g.fillRect(0,0,this.getWidth(), this.getHeight());
+        Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(0,0,this.getWidth(), this.getHeight());
+
         for (Paint paint : paints) {
             BufferedImage bitmap = toBufferedImage(paint.bitmap());
             Canvas canvas = Canvas.ofSize(this.getWidth(), this.getHeight())
                     .fit(bitmap.getWidth(), bitmap.getHeight());
 
-
             int w = (int) (canvas.width() * paint.zoom());
-            int x = (this.getWidth() - w) / 2;
+            int x = (this.getWidth() - w) / 2 + (int) paint.panX();
             int h = (int) (canvas.height() * paint.zoom());
-            int y = (this.getHeight() - h) / 2;
-            g.drawImage(bitmap, x+paint.offset(), y, w, h, null);
+            int y = (this.getHeight() - h) / 2 + (int) paint.panY();
+
+            g2d.drawImage(bitmap, x+paint.offset(), y, w, h, null);
         }
     }
 
@@ -110,7 +121,7 @@ public class SwingImageDisplay extends JPanel implements ImageDisplay {
 
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
-            SwingImageDisplay.this.zoomFactor.offset(- e.getWheelRotation());
+            SwingImageDisplay.this.zoomFactor.zoom(-e.getWheelRotation(), e.getX(), e.getY());
         }
     }
 

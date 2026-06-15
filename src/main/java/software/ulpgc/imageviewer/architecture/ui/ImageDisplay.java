@@ -9,6 +9,7 @@ public interface ImageDisplay {
     void paint(Paint... paints);
 
     int width();
+    int height();
 
     interface Shift {
         void offset(int value);
@@ -18,11 +19,11 @@ public interface ImageDisplay {
         void offset(int value);
     }
 
-    interface Zoom{
-        void offset(int zoom);
+    interface Zoom {
+        void zoom(int factor, int mouseX, int mouseY);
     }
 
 
-    public record Paint(byte[] bitmap, int offset, double zoom) {}
+    record Paint(byte[] bitmap, int offset, double panX, double panY, double zoom) {}
 
 }

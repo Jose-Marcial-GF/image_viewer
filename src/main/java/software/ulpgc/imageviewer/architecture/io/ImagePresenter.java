@@ -14,6 +14,8 @@ public class ImagePresenter {
     private final Rescheduler presentationTimer;
     private Image image;
     private double zoom = 1.0;
+    private double panX = 0.0;
+    private double panY = 0.0;
 
     public ImageDisplay display() {
         return display;
@@ -22,10 +24,10 @@ public class ImagePresenter {
     public ImagePresenter(ImageDisplay display, Rescheduler.Factory factory) {
         this.display = display;
         this.reschedulerFactory = factory;
-        this.display.on((ImageDisplay.Zoom) factor ->{
-            updateZoom(factor);
+        this.display.on((factor, mouseX, mouseY) -> {
+            updateZoomAt(factor, mouseX, mouseY);
             repaint();
-        } );
+        });
         this.display.on((ImageDisplay.Shift) offset -> {
             resetZoom();
             repaint(offset);
@@ -37,22 +39,44 @@ public class ImagePresenter {
         });
         this.presentationTimer = reschedulerFactory.create(5000, _ -> this.animateMovement(0, -display.width(), image.next()).start());
     }
+    public void updateZoomAt(int factor, int mouseX, int mouseY) {
+        double oldZoom = this.zoom;
+        this.zoom = (factor > 0) ? this.zoom * 1.1 : this.zoom / 1.1;
+        this.zoom = max(0.5, Math.min(this.zoom, 5.0));
 
-    private void repaint() {
-            display.paint(new Paint(image.bitmap(), 0, zoom));
+        if (oldZoom == this.zoom) return;
 
+        double scale = this.zoom / oldZoom;
+        double centroX = display.width() / 2.0;
+        double centroY = display.height() / 2.0;
+        double distanciaRatonX = mouseX - centroX;
+        double distanciaRatonY = mouseY - centroY;
+        this.panX = distanciaRatonX - (distanciaRatonX - this.panX) * scale;
+        this.panY = distanciaRatonY - (distanciaRatonY - this.panY) * scale;
+    }
+    private void resetZoom() {
+        zoom = 1;
+        panX = 0;
+        panY = 0;
     }
 
+    private void repaint() {
+        display.paint(new Paint(image.bitmap(), 0, panX, panY, zoom));
+    }
 
     private void repaint(int offset) {
-        Paint mainPaint = new Paint(image.bitmap(), offset, zoom);
+        Paint mainPaint = new Paint(image.bitmap(), offset, panX, panY, zoom);
         Paint neighborPaint = new Paint(
                 offset < 0 ? image.next().bitmap() : image.previous().bitmap(),
                 offset < 0 ? display.width() + offset : offset - display.width(),
-                zoom
+                panX, panY, zoom
         );
-
         display.paint(mainPaint, neighborPaint);
+    }
+
+    public void show(Image image) {
+        this.image = image;
+        this.display.paint(new Paint(image.bitmap(), 0, panX, panY, zoom));
     }
     private void animateRelease(int initialOffset) {
         int targetOffset;
@@ -98,14 +122,6 @@ public class ImagePresenter {
         zoom = max(0.5, Math.min(zoom, 5.0));
     }
 
-    private void resetZoom() {
-        zoom = 1;
-    }
-
-    public void show(Image image) {
-        this.image = image;
-        this.display.paint(new Paint(image.bitmap(), 0, zoom));
-    }
 
     public Image image() {
         return image;
